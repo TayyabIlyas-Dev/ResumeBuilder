@@ -155,24 +155,26 @@ const ResumeForm: React.FC = () => {
   //   Mobile Size ke ley  A4 size layout styles.
 
   const downloadPDF = () => {
-    const resumeElement = document.querySelector(".resume-render") as HTMLElement | null;
+    const resumeElement = document.querySelector(
+      ".resume-render"
+    ) as HTMLElement | null;
 
     if (resumeElement) {
-        const options = {
-            margin: 10,
-            filename: "resume.pdf",
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        };
+      const isMobile = window.innerWidth <= 768; // Check for mobile screen
+      const scale = isMobile ? 1 : 2;
+      const options = {
+        margin: 10,
+        filename: "resume.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
 
-        html2pdf()
-            .set(options)
-            .from(resumeElement)
-            .save();
+      html2pdf().set(options).from(resumeElement).save();
+    } else {
+      console.error("Element with class .resume-render not found.");
     }
-};
-
+  };
 
   return (
     <div className="bg-[#ebebf0] pt-20">
@@ -503,31 +505,32 @@ const ResumeForm: React.FC = () => {
         {/* Render Resume Page */}
 
         <div className="flex justify-center">
-        <div className="w-full sm:w-[210mm] sm:h-[297mm] resume-render bg-white px-8 divide-y-0 mt-14 my-4 rounded-md text-black">
-          <UserProfile name={formData.name} profession={formData.profession} />
-          <hr />
-          <Objective objective="Seeking to build a career with a progressive company where I can learn, grow, and contribute to productivity, while leveraging my skills for future career advancement." />
-          <hr />
-          <PersonalInfo
-            fatherName={formData.fatherName}
-            age={formData.age}
-            Contact={formData.Contact}
-            religion={formData.religion}
-            language={formData.Language}
-            maritalStatus={formData.maritalStatus}
-          />
-          <hr />
-          <Education educationList={formData.educationList} />
-          <hr />
-          <Skills skills={formData.skills} />
-          <hr />
-          <Experience experiences={formData.experiences} />
-          <hr />
-          <Reference referenceText="Will be furnished upon request." />
+          <div className="w-full sm:w-[210mm] sm:h-[297mm] resume-render bg-white px-8 divide-y-0 mt-14 my-4 rounded-md text-black">
+            <UserProfile
+              name={formData.name}
+              profession={formData.profession}
+            />
+            <hr />
+            <Objective objective="Seeking to build a career with a progressive company where I can learn, grow, and contribute to productivity, while leveraging my skills for future career advancement." />
+            <hr />
+            <PersonalInfo
+              fatherName={formData.fatherName}
+              age={formData.age}
+              Contact={formData.Contact}
+              religion={formData.religion}
+              language={formData.Language}
+              maritalStatus={formData.maritalStatus}
+            />
+            <hr />
+            <Education educationList={formData.educationList} />
+            <hr />
+            <Skills skills={formData.skills} />
+            <hr />
+            <Experience experiences={formData.experiences} />
+            <hr />
+            <Reference referenceText="Will be furnished upon request." />
+          </div>
         </div>
-
-        </div>
-
       </div>
 
       {/* Download PDF Button */}
