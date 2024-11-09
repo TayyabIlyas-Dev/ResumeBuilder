@@ -11,7 +11,7 @@ const Education: React.FC<EducationProps> = ({ educationList }) => {
       <div className="info-jar px-9 py-2">
         <ul className="list-disc pl-5">
           {educationList.map((education, index) => (
-            <li key={index} className="font-semibold">{education}</li>
+            <li key={index} className="font-semibold py-[3px]">{education}</li>
           ))}
         </ul>
       </div>
