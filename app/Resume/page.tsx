@@ -155,26 +155,24 @@ const ResumeForm: React.FC = () => {
   //   Mobile Size ke ley  A4 size layout styles.
 
   const downloadPDF = () => {
-    // Select the resume element
-    const resumeElement = document.querySelector(".resume-render");
+    const resumeElement = document.querySelector(".resume-render") as HTMLElement | null;
 
     if (resumeElement) {
-      // Define options for PDF generation
-      const options = {
-        margin: 10, // Margin around the content
-        filename: "resume.pdf", // Name of the downloaded file
-        image: { type: "jpeg", quality: 0.98 }, // Image quality settings
-        html2canvas: { scale: 2 }, // Use higher scale for better quality
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }, // A4 size
-      };
+        const options = {
+            margin: 10,
+            filename: "resume.pdf",
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        };
 
-      // Generate the PDF
-      html2pdf()
-        .set(options)
-        .from(resumeElement) // Target the element to render
-        .save(); // Trigger download
+        html2pdf()
+            .set(options)
+            .from(resumeElement)
+            .save();
     }
-  };
+};
+
 
   return (
     <div className="bg-[#ebebf0] pt-20">
