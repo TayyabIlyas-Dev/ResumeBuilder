@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
 import UserProfile from "../Components/topinfo";
 import Objective from "../Components/ObjectiveSec";
@@ -11,6 +11,8 @@ import Reference from "../Components/Refrence";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import html2pdf from 'html2pdf.js';
+
 
 const ResumeForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +28,12 @@ const ResumeForm: React.FC = () => {
     experiences: [{ years: 0, role: "", company: "" }],
     educationList: [""],
   });
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true); // Check if it's client-side rendering
+  }, []);
 
   // Input handlers
   const handleInputChange = (
@@ -106,64 +114,63 @@ const ResumeForm: React.FC = () => {
     setFormData({ ...formData, educationList: updatedEducation });
   };
 
-  // PDF download function
-  const downloadPDF = () => {
-    if (typeof window !== "undefined") {
-      const resumeElement = document.querySelector(".resume-render") as HTMLElement;
-      
-      if (resumeElement) {
-        html2canvas(resumeElement, { scale: 3 }).then((canvas) => {
-          const pdf = new jsPDF("p", "mm", "a4");
-          const imgData = canvas.toDataURL("image/png");
-          const imgWidth = pdf.internal.pageSize.getWidth();
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  // PDF download function for large resolution
+  const downloadPDFBIG = () => {
+    if (!isClient) return; // Avoid SSR issues
 
-          let heightLeft = imgHeight;
-          let position = 0;
+    const resumeElement = document.querySelector(".resume-render") as HTMLElement;
 
+    if (resumeElement) {
+      html2canvas(resumeElement, { scale: 3 }).then((canvas) => {
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgData = canvas.toDataURL("image/png");
+        const imgWidth = pdf.internal.pageSize.getWidth();
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "PNG", 10, position, imgWidth - 20, imgHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+
+        while (heightLeft > 0) {
+          position -= pdf.internal.pageSize.getHeight();
+          pdf.addPage();
           pdf.addImage(imgData, "PNG", 10, position, imgWidth - 20, imgHeight);
           heightLeft -= pdf.internal.pageSize.getHeight();
+        }
 
-          while (heightLeft > 0) {
-            position -= pdf.internal.pageSize.getHeight();
-            pdf.addPage();
-            pdf.addImage(imgData, "PNG", 10, position, imgWidth - 20, imgHeight);
-            heightLeft -= pdf.internal.pageSize.getHeight();
-          }
-
-          pdf.save("resume.pdf");
-        });
-      } else {
-        console.error("Element with class .resume-render not found.");
-      }
+        pdf.save("resume.pdf");
+      });
+    } else {
+      console.error("Element with class .resume-render not found.");
     }
   };
 
+  // PDF download function for mobile/desktop sizes
+  const downloadPDF = () => {
+    if (!isClient) return; // Avoid SSR issues
 
+    const resumeElement = document.querySelector(".resume-render") as HTMLElement | null;
 
-  // //   Mobile Size ke ley  A4 size layout styles.
+    if (resumeElement) {
+      const isMobile = window.innerWidth <= 768; // Check for mobile screen
+      const scale = isMobile ? 1 : 2;
 
-  // const downloadPDF = () => {
-  //   const resumeElement = document.querySelector(
-  //     ".resume-render"
-  //   ) as HTMLElement | null;
+      const options = {
+        margin: 10,
+        filename: "resume.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
 
-  //   if (resumeElement) {
-  //     const isMobile = window.innerWidth <= 768; // Check for mobile screen
-  //     const scale = isMobile ? 1 : 2;
-  //     const options = {
-  //       margin: 10,
-  //       filename: "resume.pdf",
-  //       image: { type: "jpeg", quality: 0.98 },
-  //       html2canvas: { scale },
-  //       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-  //     };
+      html2pdf().set(options).from(resumeElement).save();
+    } else {
+      console.error("Element with class .resume-render not found.");
+    }
+  };
 
-  //     html2pdf().set(options).from(resumeElement).save();
-  //   } else {
-  //     console.error("Element with class .resume-render not found.");
-  //   }
-  // };
 
   return (
     <div className="bg-[#ebebf0] pt-20">
@@ -196,7 +203,7 @@ const ResumeForm: React.FC = () => {
                   </span>
                   <span className="hidden sm:block">
                     <button
-                      onClick={downloadPDF}
+                      onClick={downloadPDFBIG}
                       className={` px-3 py-2 text-2xl 
                      sm:${"hover:border-solid border-2 hover:bg-white hover:text-black bg-black text-white font-semibold flex justify-center items-center gap-2 border-black text-md  px-5   rounded-full"}`}
                     >
@@ -476,7 +483,7 @@ const ResumeForm: React.FC = () => {
 
                 <span className="hidden sm:block">
                   <button
-                    onClick={downloadPDF}
+                    onClick={downloadPDFBIG}
                     className="mt-4 border-2 border-black hover:text-black hover:bg-white  bg-black text-white font-semibold py-2 px-4 rounded-md"
                   >
                     Download PDF
@@ -535,7 +542,7 @@ const ResumeForm: React.FC = () => {
 
         <span className="hidden sm:block">
           <button
-            onClick={downloadPDF}
+            onClick={downloadPDFBIG}
             className="border-solid border-2 hover:bg-black hover:text-white text-black  font-semibold border-black text-sm p-1.5 px-5 mx-3 rounded-md"
           >
             Download PDF
